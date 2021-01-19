@@ -11,13 +11,30 @@ struct CardView: View {
 
     @Binding var symbol: String
     @Binding var background: Color
+    private let transition = AnyTransition.move(edge: .bottom)
 
     var body: some View {
-        Image(symbol)
-            .resizable()
-            .scaledToFit()
-            .background(background.opacity(0.5))
-            .cornerRadius(20)
+        VStack {
+            switch symbol {
+                case "apple":
+                    Image(symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .transition(transition)
+                case "cherry":
+                    Image(symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .transition(transition)
+                default:
+                    Image(symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .transition(transition)
+            }
+        }
+        .background(background.opacity(0.5))
+        .cornerRadius(20)
     }
 }
 

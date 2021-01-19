@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
 
+    @State private var isWin = false
     @State private var symbols = ["apple", "cherry", "star"]
-
     @State private var backgrounds = Array<Color>(repeating: .white, count: 9)
-
+    @State private var backgroundForCredits = Color.white
     @State private var indices = Array<Int>(repeating: 0, count: 9)
-
     @State private var credits = 1000
     private let betAmount = 5
+
 
     var body: some View {
         ZStack {
@@ -54,13 +54,17 @@ struct ContentView: View {
 
                 Spacer()
 
-                HStack(spacing: 20) {
+                HStack(spacing: 30) {
                     // Credits counter
                     Text("Credits: " + String(credits))
                         .foregroundColor(.black)
                         .padding(10)
-                        .background(Color.white.opacity(0.5))
+                        .background(backgroundForCredits.opacity(0.5))
+                        .animation(.none)
                         .cornerRadius(20)
+                        .scaleEffect(isWin ? 1.2 : 1)
+                        .animation(.spring())
+
 
                     // Button to reset credits.
                     Button(action: {
@@ -107,7 +111,7 @@ struct ContentView: View {
                 HStack(spacing: 30) {
                     VStack {
                         Button(action: {
-                            self.processResult(isMaxSpin: false)
+                            self.processResult()
                         }) {
                             Text("Spin")
                                 .bold()
@@ -134,17 +138,20 @@ struct ContentView: View {
                                 .cornerRadius(20)
                         }
 
-                        Text("15 credits")
+                        Text("25 credits")
                     }
                 }
 
                 Spacer()
             }
         }
+        .animation(.easeOut)
     }
 
-    func processResult(isMaxSpin: Bool) {
+    func processResult(isMaxSpin: Bool = false) {
         if credits >= betAmount {
+            self.isWin = false
+            self.backgroundForCredits = .white
             self.backgrounds = self.backgrounds.map { _ in
                 Color.white
             }
@@ -155,9 +162,11 @@ struct ContentView: View {
                 self.indices[5] = Int.random(in: 0..<3)
 
                 if isMatch(3, 4, 5) {
+                    self.backgroundForCredits = .green
                     self.updateBackgroundForCellMatch(3, 4, 5)
+                    self.isWin = true
 
-                    self.credits += betAmount * 5
+                    self.credits += betAmount * 3
                 } else {
                     self.credits -= betAmount
                 }
@@ -203,18 +212,25 @@ struct ContentView: View {
                 }
 
                 if matches == 0 {
-                    self.credits -= betAmount * 3
+                    self.credits -= betAmount * 5
                 } else {
+                    self.isWin = true
+                    var colorForCreditsLabel = Color.green
+
                     // Match all cells. Bonus 50 credits.
                     if matches == 8 && isMatchAllCell() {
                         self.credits += 50
 
+                        colorForCreditsLabel = .red
                         self.backgrounds = self.backgrounds.map { _ in
                             Color.red
                         }
                     }
 
                     self.credits += matches * betAmount * 10
+
+                    // Update background for credits counter label
+                    self.backgroundForCredits = colorForCreditsLabel
                 }
             }
         }
