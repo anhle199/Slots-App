@@ -9,30 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
 
-    private let countRows = 3 // also is number of the columns
+    @State private var symbols = ["apple", "cherry", "star"]
 
-//    @State private var symbols = [
-//        ["apple", "cherry", "star"],
-//        ["apple", "cherry", "star"],
-//        ["apple", "cherry", "star"],
-//    ]
+    @State private var backgrounds = Array<Color>(repeating: .white, count: 9)
 
-    private let symbols = ["apple", "cherry", "star"]
-
-    @State private var backgrounds = [
-        [Color.white, Color.white, Color.white],
-        [Color.white, Color.white, Color.white],
-        [Color.white, Color.white, Color.white],
-    ]
-
-    @State private var numbers = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-    ]
+    @State private var indices = Array<Int>(repeating: 0, count: 9)
 
     @State private var credits = 1000
-    private let betAmount = 15
+    private let betAmount = 5
 
     var body: some View {
         ZStack {
@@ -70,93 +54,88 @@ struct ContentView: View {
 
                 Spacer()
 
-                // Credits counter
-                Text("Credits: " + String(credits))
-                    .foregroundColor(.black)
-                    .padding(10)
-                    .background(Color.white.opacity(0.5))
-                    .cornerRadius(20)
-
-                Spacer()
-
-                // Cards
-                VStack {
-                    ForEach(0..<countRows) { row in
-                        CardRowView(symbols: self.symbols,
-                                    backgrounds: self.$backgrounds[row],
-                                    numbers: self.$numbers[row])
-                    }
-                }
-
-                Spacer()
-
-                // Button
-                Button(action: {
-                    if (credits >= betAmount) {
-                        // Set default backgrounds
-                        self.backgrounds = self.backgrounds.map { colorsEachRow in
-                            colorsEachRow.map { _ in
-                                Color.white
-                            }
-                        }
-
-                        // Random images (index)
-                        self.numbers = self.numbers.map { row in
-                            row.map { _ in
-                                Int.random(in: 0..<countRows)
-                            }
-                        }
-
-
-                        var countMatches = 0
-
-                        // Check rows and columns
-                        for i in 0..<countRows {
-                            if (isMatchRow(at: i)) {
-                                countMatches += 1
-                                self.updateBackgroundsInRow(at: i)
-                            }
-
-                            if (isMatchColumn(at: i)) {
-                                countMatches += 1
-                                self.updateBackgroundsInColumn(at: i)
-                            }
-                        }
-
-                        // Check main diagonal
-                        if (isMatchMainDiagonal()) {
-                            countMatches += 1
-                            self.updateBackgroundsInMainDiagonal()
-                        }
-
-                        // Check secondary diagonal
-                        if (isMatchSecondaryDiagonal()) {
-                            countMatches += 1
-                            self.updateBackgroundsInSecondaryDiagonal()
-                        }
-
-                        // Winning
-                        if (countMatches > 0) {
-                            if (countMatches == 8) {
-                                if (isMatchAllCell()) {
-                                    countMatches = 10
-                                }
-                            }
-
-                            self.credits += countMatches * (betAmount / countRows) * 10
-                        } else {
-                            self.credits -= betAmount
-                        }
-                    }
-
-                }) {
-                    Text("Spin")
-                        .bold()
-                        .foregroundColor(.white)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 30)
-                        .background(Color.pink)
+                HStack(spacing: 20) {
+                    // Credits counter
+                    Text("Credits: " + String(credits))
+                        .foregroundColor(.black)
+                        .padding(10)
+                        .background(Color.white.opacity(0.5))
                         .cornerRadius(20)
+
+                    // Button to reset credits.
+                    Button(action: {
+                        self.credits = 1000
+                        self.backgrounds = self.backgrounds.map { _ in
+                            Color.white
+                        }
+                        self.indices = self.indices.map { _ in
+                            0
+                        }
+                    }) {
+                        Text("Reset")
+                            .foregroundColor(.black)
+                            .padding(10)
+                            .background(Color.white.opacity(0.5))
+                            .cornerRadius(20)
+                    }
+                }
+
+                Spacer()
+
+                // Matrix Cards
+                VStack {
+                    ForEach(0..<3, id: \.self) { number in
+                        let start = number * 3
+                        let end = (number + 1) * 3
+
+                        HStack {
+                            Spacer()
+
+                            ForEach(start..<end, id: \.self) { i in
+                                CardView(symbol: self.$symbols[indices[i]],
+                                         background: self.$backgrounds[i])
+                            }
+
+                            Spacer()
+                        }
+                    }
+                }
+
+                Spacer()
+
+                // Buttons
+                HStack(spacing: 30) {
+                    VStack {
+                        Button(action: {
+                            self.processResult(isMaxSpin: false)
+                        }) {
+                            Text("Spin")
+                                .bold()
+                                .foregroundColor(.white)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 30)
+                                .background(Color.pink)
+                                .cornerRadius(20)
+                        }
+
+                        Text("5 credits")
+                    }
+
+                    VStack {
+                        Button(action: {
+                            self.processResult(isMaxSpin: true)
+                        }) {
+                            Text("Max Spin")
+                                .bold()
+                                .foregroundColor(.white)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 30)
+                                .background(Color.pink)
+                                .cornerRadius(20)
+                        }
+
+                        Text("15 credits")
+                    }
                 }
 
                 Spacer()
@@ -164,87 +143,95 @@ struct ContentView: View {
         }
     }
 
-    // Check rows
-    func isMatchRow(at i: Int) -> Bool {
-        for j in 0..<(numbers[i].count - 1) {
-            if numbers[i][j] != numbers[i][j + 1] {
-                return false
+    func processResult(isMaxSpin: Bool) {
+        if credits >= betAmount {
+            self.backgrounds = self.backgrounds.map { _ in
+                Color.white
+            }
+
+            if !isMaxSpin {
+                self.indices[3] = Int.random(in: 0..<3)
+                self.indices[4] = Int.random(in: 0..<3)
+                self.indices[5] = Int.random(in: 0..<3)
+
+                if isMatch(3, 4, 5) {
+                    self.updateBackgroundForCellMatch(3, 4, 5)
+
+                    self.credits += betAmount * 5
+                } else {
+                    self.credits -= betAmount
+                }
+            } else {
+                self.indices = self.indices.map { _ in
+                    Int.random(in: 0..<3)
+                }
+
+                var matches = 0
+                for i in 0..<3 {
+                    // Check row i
+                    let row = 3 * i
+                    if isMatch(row, row + 1, row + 2) {
+                        matches += 1
+
+                        // Update backgrounds at row i
+                        self.updateBackgroundForCellMatch(row, row + 1, row + 2)
+                    }
+
+                    // Check column i
+                    if isMatch(i, i + 3, i + 6) {
+                        matches += 1
+
+                        // Update backgrounds at column i
+                        self.updateBackgroundForCellMatch(i, i + 3, i + 6)
+                    }
+                }
+
+                // Check main diagonal
+                if isMatch(0, 4, 8) {
+                    matches += 1
+
+                    // Update backgrounds in main diagonal
+                    self.updateBackgroundForCellMatch(0, 4, 8)
+                }
+
+                // Check secondary diagonal
+                if isMatch(2, 4, 6) {
+                    matches += 1
+
+                    // Update backgrounds in secondary diagonal
+                    self.updateBackgroundForCellMatch(2, 4, 6)
+                }
+
+                if matches == 0 {
+                    self.credits -= betAmount * 3
+                } else {
+                    // Match all cells. Bonus 50 credits.
+                    if matches == 8 && isMatchAllCell() {
+                        self.credits += 50
+
+                        self.backgrounds = self.backgrounds.map { _ in
+                            Color.red
+                        }
+                    }
+
+                    self.credits += matches * betAmount * 10
+                }
             }
         }
-
-        return true
     }
 
-    // Check columns
-    func isMatchColumn(at i: Int) -> Bool {
-        for j in 0..<(countRows - 1) {
-            if numbers[j][i] != numbers[j + 1][i] {
-                return false
-            }
-        }
-
-        return true
+    func isMatch(_ index1: Int, _ index2: Int, _ index3: Int) -> Bool {
+        return indices[index1] == indices[index2] && indices[index2] == indices[index3]
     }
 
-    // Check main diagonal
-    func isMatchMainDiagonal() -> Bool {
-        for i in 0..<(countRows - 1) {
-            if numbers[i][i] != numbers[i + 1][i + 1] {
-                return false
-            }
-        }
-
-        return true
-    }
-
-    // Check secondary diagonal
-    func isMatchSecondaryDiagonal() -> Bool {
-        for i in 0..<(countRows - 1) {
-            if numbers[i][countRows - 1 - i] != numbers[i + 1][countRows - 2 - i] {
-                return false
-            }
-        }
-
-        return true
-    }
-
-    // Check table
     func isMatchAllCell() -> Bool {
-        for row in numbers {
-            if !row.allSatisfy( { $0 == numbers[0][0] } ) {
-                return false
-            }
-        }
-
-        return true
+        !indices.contains(where: { $0 != indices[0] } )
     }
 
-    // Update background of row i
-    func updateBackgroundsInRow(at i: Int) {
-        self.backgrounds[i] = self.backgrounds[i].map { _ in
-            Color.green
-        }
-    }
-
-    // Update background of column i
-    func updateBackgroundsInColumn(at i: Int) {
-        for j in 0..<countRows {
-            self.backgrounds[j][i] = .green
-        }
-    }
-
-    // Update background of main diagonal
-    func updateBackgroundsInMainDiagonal() {
-        for i in 0..<countRows {
-            self.backgrounds[i][i] = .green
-        }
-    }
-
-    // Update background of secondary diagonal
-    func updateBackgroundsInSecondaryDiagonal() {
-        for i in 0..<countRows {
-            self.backgrounds[i][countRows - 1 - i] = .green
-        }
+    func updateBackgroundForCellMatch(_ index1: Int, _ index2: Int, _ index3: Int) {
+        self.backgrounds[index1] = .green
+        self.backgrounds[index2] = .green
+        self.backgrounds[index3] = .green
     }
 }
 

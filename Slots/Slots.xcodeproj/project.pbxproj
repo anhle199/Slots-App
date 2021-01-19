@@ -12,7 +12,6 @@
 		E6EFF78C25B4614C00B4396E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E6EFF78B25B4614C00B4396E /* Assets.xcassets */; };
 		E6EFF78F25B4614C00B4396E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E6EFF78E25B4614C00B4396E /* Preview Assets.xcassets */; };
 		E6EFF79B25B49A6100B4396E /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EFF79A25B49A6100B4396E /* CardView.swift */; };
-		E6EFF79F25B4A33800B4396E /* CardRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EFF79E25B4A33800B4396E /* CardRowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +22,6 @@
 		E6EFF78E25B4614C00B4396E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E6EFF79025B4614C00B4396E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E6EFF79A25B49A6100B4396E /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
-		E6EFF79E25B4A33800B4396E /* CardRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,7 +57,6 @@
 				E6EFF78725B4614800B4396E /* SlotsApp.swift */,
 				E6EFF78925B4614800B4396E /* ContentView.swift */,
 				E6EFF79A25B49A6100B4396E /* CardView.swift */,
-				E6EFF79E25B4A33800B4396E /* CardRowView.swift */,
 				E6EFF78B25B4614C00B4396E /* Assets.xcassets */,
 				E6EFF79025B4614C00B4396E /* Info.plist */,
 				E6EFF78D25B4614C00B4396E /* Preview Content */,
@@ -145,7 +142,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6EFF78A25B4614800B4396E /* ContentView.swift in Sources */,
-				E6EFF79F25B4A33800B4396E /* CardRowView.swift in Sources */,
 				E6EFF79B25B49A6100B4396E /* CardView.swift in Sources */,
 				E6EFF78825B4614800B4396E /* SlotsApp.swift in Sources */,
 			);
